@@ -341,6 +341,51 @@ background:#ff758c;
 border:none;
 border-radius:10px;
 color:white;
+cursor:pointer;
+
+}
+
+.phone-group{
+
+display:flex;
+gap:10px;
+margin:10px 0;
+
+}
+
+.country-code{
+
+width:30%;
+padding:14px;
+border-radius:10px;
+border:1px solid grey;
+
+}
+
+.phone-input{
+
+width:70%;
+padding:14px;
+border-radius:10px;
+border:1px solid grey;
+
+}
+
+.error-message{
+
+color:red;
+font-size:12px;
+margin-top:5px;
+display:none;
+
+}
+
+.success-message{
+
+color:green;
+font-size:12px;
+margin-top:5px;
+display:none;
 
 }
 
@@ -350,19 +395,41 @@ color:white;
 
 <h1>Room Booking</h1>
 
-<form action="/book" method="post">
+<form action="/book" method="post" id="bookingForm">
 
-<input name="name" placeholder="Name">
+<input name="name" placeholder="Name" required>
 
-<input name="phone" placeholder="Phone">
+<div class="phone-group">
 
-<input name="address" placeholder="Address">
+<select name="country_code" id="countryCode" class="country-code">
+<option value="+91">🇮🇳 India (+91)</option>
+<option value="+1">🇺🇸 USA (+1)</option>
+<option value="+44">🇬🇧 UK (+44)</option>
+<option value="+61">🇦🇺 Australia (+61)</option>
+<option value="+81">🇯🇵 Japan (+81)</option>
+<option value="+86">🇨🇳 China (+86)</option>
+<option value="+33">🇫🇷 France (+33)</option>
+<option value="+49">🇩🇪 Germany (+49)</option>
+<option value="+39">🇮🇹 Italy (+39)</option>
+<option value="+34">🇪🇸 Spain (+34)</option>
+<option value="+92">🇵🇰 Pakistan (+92)</option>
+<option value="+880">🇧🇩 Bangladesh (+880)</option>
+</select>
 
-<input type="date" name="checkin">
+<input type="tel" name="phone" id="phoneInput" placeholder="Phone Number" class="phone-input" required>
 
-<input type="date" name="checkout">
+</div>
 
-<select name="room">
+<div class="error-message" id="phoneError"></div>
+<div class="success-message" id="phoneSuccess"></div>
+
+<input name="address" placeholder="Address" required>
+
+<input type="date" name="checkin" required>
+
+<input type="date" name="checkout" required>
+
+<select name="room" required>
 
 <option>Standard Non AC</option>
 <option>Standard AC</option>
@@ -371,15 +438,83 @@ color:white;
 
 </select>
 
-<button>Book Room</button>
+<button type="submit" id="bookBtn">Book Room</button>
 
 </form>
 
-<a href="/dashboard">
+<a href="/dashboard" style="text-decoration:none;">
 <button style="padding:14px;width:100%;background:#ff758c;border:none;border-radius:10px;color:white;cursor:pointer;margin-top:10px;">Back</button>
 </a>
 
 </div>
+
+<script>
+
+const phoneInput = document.getElementById('phoneInput');
+const countryCode = document.getElementById('countryCode');
+const phoneError = document.getElementById('phoneError');
+const phoneSuccess = document.getElementById('phoneSuccess');
+const bookBtn = document.getElementById('bookBtn');
+const bookingForm = document.getElementById('bookingForm');
+
+// Phone digit requirements by country code
+const phoneDigits = {
+    '+91': 10,  // India
+    '+1': 10,   // USA
+    '+44': 10,  // UK
+    '+61': 9,   // Australia
+    '+81': 10,  // Japan
+    '+86': 11,  // China
+    '+33': 9,   // France
+    '+49': 11,  // Germany
+    '+39': 10,  // Italy
+    '+34': 9,   // Spain
+    '+92': 10,  // Pakistan
+    '+880': 10  // Bangladesh
+};
+
+function validatePhone() {
+    const phoneNum = phoneInput.value.trim();
+    const code = countryCode.value;
+    const requiredDigits = phoneDigits[code];
+    
+    // Only digits
+    const digitsOnly = phoneNum.replace(/\D/g, '');
+    
+    phoneError.style.display = 'none';
+    phoneSuccess.style.display = 'none';
+    
+    if (phoneNum === '') {
+        phoneError.textContent = '';
+        return true;
+    }
+    
+    if (digitsOnly.length !== requiredDigits) {
+        phoneError.textContent = `Invalid ${code} number. Please enter ${requiredDigits} digits.`;
+        phoneError.style.display = 'block';
+        return false;
+    }
+    
+    phoneSuccess.textContent = '✓ Valid phone number';
+    phoneSuccess.style.display = 'block';
+    return true;
+}
+
+phoneInput.addEventListener('input', validatePhone);
+countryCode.addEventListener('change', validatePhone);
+
+bookingForm.addEventListener('submit', function(e) {
+    if (!validatePhone()) {
+        e.preventDefault();
+        alert('Please enter a valid phone number');
+    } else {
+        // Store full phone number with country code
+        const fullPhone = countryCode.value + phoneInput.value.replace(/\D/g, '');
+        phoneInput.value = fullPhone;
+    }
+});
+
+</script>
 
 """)
 
